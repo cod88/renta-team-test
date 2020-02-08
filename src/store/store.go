@@ -59,18 +59,24 @@ func GetNews(id string) string {
 
 	var rec NewsRecord
 
-	rows, err := DB.Query("SELECT id, title, date FROM news WHERE id='" + id + "'")
-
+	rows, err := DB.Query("SELECT id, title, date FROM news WHERE id=?", id)
 	if err != nil {
 		fmt.Printf("%+v\n", err)
 		return "error"
 	}
 
+	defer rows.Close()
 	rows.Next()
 	rows.Scan(&rec.Id, &rec.Title, &rec.Date)
 
-	data, _ := json.Marshal(rec)
-	fmt.Printf("%+v\n", string(data))
-	return string(data)
-	// return fmt.Sprintf("{\"id\":\"%s\",\"title\":\"Example\",\"date\":\"2020-02-07\"}", id)
+	var data string
+	if rec.Id == "" {
+		data = "News does not exists"
+	} else {
+		unmarsheled, _ := json.Marshal(rec)
+		data = string(unmarsheled)
+	}
+
+	fmt.Printf("%+v\n", data)
+	return data
 }
