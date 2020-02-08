@@ -8,3 +8,6 @@ Host = "127.0.0.1"
 Username = "example"
 NewsTopic = "example/news"
 BrokerUrl = "127.0.0.1:1883"
+
+[StoreConfig]
+DbFilename = "db/news.db"

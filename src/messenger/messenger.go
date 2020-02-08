@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"store"
 	"sync"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -111,10 +113,25 @@ func WaitQueryForNews() error {
 
 	client.Subscribe(Config.NewsTopic, 0, func(client mqtt.Client, message mqtt.Message) {
 		fmt.Println("Query for news " + string(message.Payload()))
-		id := "34"
-		if token := client.Publish(Config.NewsTopic+"/"+id, 0, false, "{\"id\":\"34\",\"title\":\"Example\",\"date\":\"2020-02-07\"}"); token.Wait() && token.Error() != nil {
+		var qn TQueryNews
+		var result string
+
+		err := json.Unmarshal(message.Payload(), &qn)
+		if err != nil {
+			result = "error"
+			return
+		}
+
+		fmt.Printf("%+v\n", qn)
+		id := qn.Id
+
+		result = store.GetNews(id)
+		time.Sleep(1 * time.Second)
+
+		if token := client.Publish(Config.NewsTopic+"/"+id, 0, false, result); token.Wait() && token.Error() != nil {
 			fmt.Printf("%+v\n", token.Error())
 		}
+		fmt.Println("Published " + Config.NewsTopic + "/" + id)
 	})
 
 	return nil
