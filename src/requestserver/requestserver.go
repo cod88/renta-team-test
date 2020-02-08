@@ -2,6 +2,7 @@ package requestserver
 
 import (
 	"fmt"
+	"messenger"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -44,11 +45,28 @@ func RunServer() {
 	router := mux.NewRouter()
 	router.HandleFunc("/news/{id}", getNews).Methods("GET")
 
+	fmt.Println("Listening on " + Config.Host + ":" + Config.Port)
 	http.ListenAndServe(Config.Host+":"+Config.Port, router)
 }
 
 func getNews(w http.ResponseWriter, r *http.Request) {
 	var vars = mux.Vars(r)
+
+	fmt.Printf("%+v\n", messenger.Config)
+	err := messenger.QueryNews(vars["id"])
+
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+	}
+
+	data, err := messenger.WaitAnswerForNews(vars["id"])
+	if err != nil {
+		fmt.Printf("%+v\n", err)
+		w.WriteHeader(http.StatusBadGateway)
+		fmt.Fprintf(w, "%s", "{\"result\":\"error\",\"data\":\"\"}")
+	}
+
+	fmt.Println(data)
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "That news: %s !", vars["id"])
+	fmt.Fprintf(w, "{\"result\":\"success\",\"data\":\"%s\"}", data)
 }

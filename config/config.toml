@@ -3,3 +3,8 @@ Appname = "Query client server"
 [RequestServerConfig]
 Port = "8080"
 Host = "127.0.0.1"
+
+[MessengerConfig]
+Username = "example"
+NewsTopic = "example/news"
+BrokerUrl = "127.0.0.1:1883"

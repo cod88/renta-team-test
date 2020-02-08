@@ -9,8 +9,8 @@ import (
 func main() {
 	config := appconfig.GetConfig()
 
-	fmt.Printf("%+v", config)
+	fmt.Printf("%+v\n", config)
 
 	fmt.Println("HTTP interface for api...")
-	go requestserver.RunServer()
+	requestserver.RunServer()
 }
